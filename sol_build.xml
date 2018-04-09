@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ====================================================================== 
+     Jan 20, 2016 10:37:33 PM                                                        
+
+     Build file for workflow monitor interface.    
+                   
+     shahboz                                                                
+     ====================================================================== -->
+<project name="MyMonitorService" default="build-server" basedir=".">
+	
+	<property name="src.dir" location="${basedir}/src"/>
+	<property name="build.dir" location="${basedir}/build"/>
+	<property name="generated.dir" location="${basedir}/generated" />
+	
+	
+	<property name="wsdl.dir" location="${basedir}/wsdl"/>
+	<property name="wsdl.filename" value="Workflow.wsdl"/>
+	<property name="schema.filename" value="MonitorTypes.xsd"/>
+	<property name="wsdl.file" location="${wsdl.dir}/${wsdl.filename}"/>
+	
+	
+	<property name="server.class" value="it.polito.dp2.WF.sol4.server.WorkflowServer" />
+	
+	<property name="debug" value="true" />
+	<property name="debuglevel" value="source,lines,vars" />
+	<property name="target" value="1.7" />
+	<property name="source" value="1.7" />
+	
+	<path id="server.classpath">
+		<pathelement location="${basedir}/lib/WF.jar" />
+		<pathelement location="${basedir}/lib/WFRandom.jar" />
+		<pathelement location="${basedir}/lib/junit-4.5.jar" />
+		<pathelement location="${basedir}/lib/WFRandom.jar" />
+		<pathelement location="${basedir}/lib/lab4.jar" />
+		<pathelement path="${build.dir}" />
+	</path>
+	
+	<path id="clien1.classpath">
+			<pathelement location="${lib.dir}/WF.jar"/>
+		</path>
+   <!-- define the "init" target -->
+	<target name="init" depends="clean">
+		<mkdir dir="${build.dir}" />
+		<mkdir dir="${build.dir}/META-INF"/>
+		<mkdir dir="${generated.dir}" />
+		
+	</target>
+	
+	<target name="chk-artifacts">
+		<uptodate property="generate-artifacts.notRequired" targetfile="${generated.dir}/.flagfile">
+			<srcfiles dir="${wsdl.dir}">
+				<include name="**/*.xsd" />
+				<include name="**/*.wsdl" />
+			</srcfiles>
+		</uptodate>
+	</target>
+	
+	<target name="generate-artifacts" unless="generate-artifacts.notRequired" depends="init, chk-artifacts">
+		<exec executable="wsimport" failonerror="true">
+			<arg value="-keep" />
+			<arg value="-d" />
+			<arg path="${build.dir}" />
+			<arg value="-s" />
+			<arg path="${generated.dir}" />
+			<arg value="-p" />
+			<arg value="it.polito.dp2.WF.sol4.jaxws" />
+			<arg file="${wsdl.file}" />
+		</exec>
+		<touch file="${generated.dir}/.flagfile" />
+	</target>  
+	
+   <!-- define the "build.jaxws.service" target -->
+	<target name="build-server" depends="init, generate-artifacts" description="Build the sources">
+		<copy todir="${build.dir}/META-INF" overwrite="true">
+			<fileset dir="${wsdl.dir}">
+				<include name="${wsdl.filename}"/>
+				<include name="${schema.filename}"/>
+			</fileset>
+		</copy>	
+		<javac debug="${debug}" 
+				debuglevel="${debuglevel}" 
+				source="${source}" 
+				target="${target}" 
+				destdir="${build.dir}"
+				includeantruntime="false">
+				<src path="${src.dir}" />
+				<classpath refid="server.classpath" />
+			</javac>
+		</target>
+	<!-- Target build client1 -->
+	<target name="build-client" depends="init, generate-artifacts" description="Build client1">
+		<javac destdir="${build.dir}" debug="${debug}" debuglevel="${debuglevel}" source="${source}" target="${target}" includeantruntime="false">
+			<src path="${src.dir}"/>
+			<src path="${generated.dir}"/>
+			<include name="it/polito/dp2/WF/sol4/client1/**" />
+			<include name="it/polito/dp2/WF/sol4/client2/**" />
+			<classpath>
+				<path refid="clien1.classpath" />
+			</classpath>
+		</javac>
+		<echo>Done.</echo>
+	</target>
+
+	<!-- define the "clean" target -->
+	<target name="clean" description="Clean all">
+		<delete dir="${build.dir}" />
+		<delete dir="${generated.dir}" />
+	</target>
+   
+	
+</project>

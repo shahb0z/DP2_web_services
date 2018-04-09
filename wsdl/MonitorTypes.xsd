@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xsd:schema targetNamespace="http://www.example.org/Workflow"
+	xmlns:tns="http://www.example.org/Workflow" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+
+	<!-- All global elements -->
+	<xsd:element name="getWorkflows" type="tns:getWorkflowsType"></xsd:element>
+	<xsd:element name="getWorkflowsResponse" type="tns:getWorkflowsResponseType"></xsd:element>
+
+	<xsd:element name="getProcesses" type="tns:getProcessesType"></xsd:element>
+	<xsd:element name="getProcessesResponse" type="tns:getProcessesResponseType"></xsd:element>
+
+	<xsd:element name="takeAction" type="tns:takeActionType"></xsd:element>
+	<xsd:element name="takeActionResponse" type="tns:takeActionResponseType"></xsd:element>
+
+	<xsd:element name="terminateAction" type="tns:terminateActionType"></xsd:element>
+	<xsd:element name="terminateActionResponse" type="tns:terminateActionResponseType"></xsd:element>
+
+	<xsd:element name="getWorkflowNames" type="tns:getWorkflowNamesType"></xsd:element>
+	<xsd:element name="getWorkflowNamesResponse" type="tns:getWorkflowNamesResponseType"></xsd:element>
+
+	<xsd:element name="createProcess" type="tns:createProcessType"></xsd:element>
+	<xsd:element name="createProcessResponse" type="tns:createProcessResponseType"></xsd:element>
+
+	<xsd:element name="getProcessesInfo" type="tns:getProcessesInfoType"></xsd:element>
+	<xsd:element name="getProcessesInfoResponse" type="tns:getProcessesInfoResponseType"></xsd:element>
+
+	<!-- Exceptions -->
+	<xsd:element name="NoAccesRightFault" type="tns:NoAccesRightFaultType"></xsd:element>
+
+	<xsd:element name="UnknownAction" type="tns:UnknownActionType"></xsd:element>
+
+	<xsd:element name="UnknownWorkflow" type="tns:UnknownWorkflowType"></xsd:element>
+
+	<xsd:element name="UnknownInstance" type="tns:UnknownInstanceType"></xsd:element>
+
+
+	<!-- Types -->
+	<xsd:complexType name="getWorkflowsType">
+	<xsd:annotation><xsd:documentation>
+		This type represents request for workflows.
+		Here you should provide list of workflow names.
+		List size can maximum 20, because of performance issues.		
+	</xsd:documentation></xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="wfName" type="xsd:string" maxOccurs="20"
+				minOccurs="1" />
+				
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="getWorkflowsResponseType">
+		<xsd:annotation><xsd:documentation>
+			This type represents response for workflows request.
+			It is a list of workflows.
+			List size can maximum 20, because of performance issues.		
+		</xsd:documentation></xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="Workflow" type="tns:WorkflowType"
+				maxOccurs="20" minOccurs="0">
+				<xsd:key name="actionKey">
+					<xsd:selector xpath="Action"></xsd:selector>
+					<xsd:field xpath="name"></xsd:field>
+				</xsd:key>
+				<xsd:keyref name="actionNameRef" refer="tns:actionKey">
+					<xsd:selector xpath="Action/NextPossibleActions/item" />
+					<xsd:field xpath="." />
+				</xsd:keyref>
+			</xsd:element>
+			
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="getProcessesType">
+		<xsd:sequence>
+			<xsd:element name="info" type="tns:infoType" maxOccurs="20"
+				minOccurs="1">
+			</xsd:element>
+			
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="getProcessesResponseType">
+		<xsd:sequence>
+			<xsd:element name="Instance" type="tns:InstanceType"
+				maxOccurs="20" minOccurs="0"></xsd:element>
+				
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="takeActionType">
+		<xsd:sequence>
+			<xsd:element name="action" type="tns:statusInfo"></xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="takeActionResponseType">
+		<xsd:sequence>
+			<xsd:element name="status" type="xsd:boolean"></xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="terminateActionType">
+		<xsd:sequence>
+			<xsd:element name="action" type="tns:statusInfo"></xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="terminateActionResponseType">
+		<xsd:sequence>
+			<xsd:element name="status" type="xsd:boolean"></xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="getWorkflowNamesType" >
+		<xsd:sequence>
+			<xsd:element name="page" type="xsd:int"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="getWorkflowNamesResponseType">
+		<xsd:annotation><xsd:documentation>
+			This type represents request for workflow names.
+			It is a list of workflow names. This data is used for 
+			requesting workflows.		
+		</xsd:documentation></xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="workflowName" type="tns:infoType"
+				maxOccurs="40" minOccurs="0"></xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="createProcessType">
+		<xsd:sequence>
+			<xsd:element name="instanceOf" type="xsd:string">
+			</xsd:element>
+			<xsd:element name="userIDType">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:enumeration value="Premium"/>
+						<xsd:enumeration value="Basic"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="createProcessResponseType">
+		<xsd:sequence>
+			<xsd:element name="status" type="xsd:boolean"></xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="NoAccesRightFaultType">
+		<xsd:sequence>
+			<xsd:element name="message" type="xsd:string">
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="getProcessesInfoType" >
+		<xsd:sequence>
+			<xsd:element name="page" type="xsd:int"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="getProcessesInfoResponseType">
+		<xsd:sequence>
+			<xsd:element name="InstanceInfo" minOccurs="0" maxOccurs="40">
+				<xsd:complexType>
+					<xsd:complexContent>
+						<xsd:extension base="tns:infoType">
+							<xsd:sequence>
+								<xsd:element name="lastModTime" type="xsd:dateTime" />
+							</xsd:sequence>
+						</xsd:extension>
+					</xsd:complexContent>
+				</xsd:complexType>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="UnknownActionType">
+		<xsd:sequence>
+			<xsd:element name="message" type="xsd:string">
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="UnknownWorkflowType">
+		<xsd:sequence>
+			<xsd:element name="message" type="xsd:string">
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="UnknownInstanceType">
+		<xsd:sequence>
+			<xsd:element name="message" type="xsd:string">
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+
+
+
+	<xsd:complexType name="statusInfo">
+		<xsd:sequence>
+			<xsd:element name="instanceOf" type="xsd:string"></xsd:element>
+			<xsd:element name="actor" type="xsd:string"></xsd:element>
+			<xsd:element name="role" type="xsd:string"></xsd:element>
+			<xsd:element name="instanceInfo" type="tns:infoType"></xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="infoType">
+		<xsd:annotation>
+			<xsd:documentation>
+				This type is used for representing workflow by
+				its name and last
+				modification time. It is useful when we retrieve
+				set of workflows,
+				we can
+				check their status before downloading in
+				client side and get only
+				modified workflows.
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="name" type="xsd:string"></xsd:element>
+			<xsd:element name="modStartTime" type="xsd:dateTime"></xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="WorkflowType">
+		<xsd:sequence>
+			<xsd:element name="Action" type="tns:ActionType"
+				maxOccurs="unbounded" minOccurs="1">
+			</xsd:element>
+		</xsd:sequence>
+		<xsd:attribute name="name" type="xsd:string" use="required"></xsd:attribute>
+		<xsd:attribute name="lastModTime" type="xsd:dateTime"></xsd:attribute>
+	</xsd:complexType>
+
+	<xsd:complexType name="ActionType">
+		<xsd:sequence>
+			<xsd:element name="name" type="xsd:string"></xsd:element>
+			<xsd:element name="role" type="xsd:string"></xsd:element>
+			<xsd:element name="isAutomaticallyInstantiated" type="xsd:boolean"
+				default="false"></xsd:element>
+			<xsd:choice>
+				<xsd:element name="NextPossibleAction" type="xsd:string"
+					maxOccurs="unbounded" minOccurs="0">
+				</xsd:element>
+				<xsd:element name="actionWorkflow" type="xsd:string"></xsd:element>
+			</xsd:choice>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="InstanceType">
+		<xsd:sequence>
+			<xsd:element name="ActionStatus" type="tns:ActionStatusType"
+				maxOccurs="unbounded" minOccurs="1">
+			</xsd:element>
+		</xsd:sequence>
+		<xsd:attribute name="instanceOf" type="xsd:string"></xsd:attribute>
+		<xsd:attribute name="startTime" type="xsd:dateTime"></xsd:attribute>
+		<xsd:attribute name="lastModTime" type="xsd:dateTime"></xsd:attribute>
+	</xsd:complexType>
+
+	<xsd:complexType name="ActionStatusType">
+		<xsd:sequence>
+			<xsd:element name="instanceOf" type="xsd:string"></xsd:element>
+			<xsd:element name="Actor" type="xsd:string" minOccurs="0"></xsd:element>
+			<xsd:element name="terminationTime" type="xsd:dateTime"
+				minOccurs="0"></xsd:element>
+			<xsd:element name="isTakenInCharge" type="xsd:boolean"
+				default="false"></xsd:element>
+			<xsd:element name="isTerminated" type="xsd:boolean"
+				default="false"></xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+</xsd:schema>
